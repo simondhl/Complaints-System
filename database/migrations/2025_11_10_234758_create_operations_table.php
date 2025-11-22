@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('operations', function (Blueprint $table) {
+            $table->id();
+            $table->bigInteger('notice_id');
+            $table->foreignId('employee_id')
+            ->constrained('employees')
+            ->cascadeOnDelete()
+            ->cascadeOnUpdate();
+            $table->foreignId('complaint_id')
+            ->constrained('complaints')
+            ->cascadeOnDelete()
+            ->cascadeOnUpdate();
+            $table->date('operation_date');
+            $table->longText('details');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('operations');
+    }
+};
