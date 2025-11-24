@@ -14,7 +14,7 @@ Route::post('/Login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
 
   Route::get('/Logout', [AuthController::class, 'logout']);
-  Route::post('/Refresh', [AuthController::class, 'refresh']);
+  // Route::post('/Refresh', [AuthController::class, 'refresh']);
   Route::get('/GovernmentSectors', [ComplaintController::class, 'get_all_government_sectors']);
 
   Route::get('/Complaint/{id}', [ComplaintController::class, 'get_complaint_details']);
@@ -24,13 +24,15 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::middleware('role:citizen')->group(function () {
 
     Route::post('/Complaints', [ComplaintController::class, 'store']);
+    Route::get('/Complaints/Citizen', [ComplaintController::class, 'get_for_citizen']);
+    Route::post('/Complaints/Search', [ComplaintController::class, 'search_complaint_number']);
   });
 
   // Employee Routes
   Route::middleware('role:government_emplyee')->group(function () {
 
       Route::get('/Complaints/GovernmentSector', [ComplaintController::class, 'get_for_government_sector']);
-      Route::put('/Complaints/UpdateStatus', [ComplaintController::class, 'update_complaint_status']);
+      Route::post('/Complaints/UpdateStatus', [ComplaintController::class, 'update_complaint_status']);
       Route::post('/Notices', [ComplaintController::class, 'add_notice']);
   });
 

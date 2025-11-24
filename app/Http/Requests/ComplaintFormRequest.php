@@ -28,9 +28,14 @@ class ComplaintFormRequest extends FormRequest
         ],
         'update_complaint_status' => [
             'status' => ['required', 'string', new NoHtml],
+            'complaint_id' => 'required|exists:complaints,id',
         ],
         'add_notice' => [
             'description' => ['required', 'string', new NoHtml],
+            'complaint_id' => 'required|exists:complaints,id',
+        ],
+        'search_complaint_number' => [
+            'complaint_number' => ['required', 'string', new NoHtml],
         ],
 
         default => [],
@@ -39,7 +44,9 @@ class ComplaintFormRequest extends FormRequest
 
     public function messages()
     {
-        return [
+       return match($this->route()->getActionMethod()) {
+
+        'store' => [
             'government_sector_id.required' => 'يجب تحديد الجهة الحكومية',
             'government_sector_id.exists' => 'الجهة الحكومية غير موجودة',
             'location.required' => 'الموقع مطلوب',
@@ -49,7 +56,25 @@ class ComplaintFormRequest extends FormRequest
             'documents.*.file' => 'كل ملف يجب أن يكون ملفاً صحيحاً',
             'documents.*.max' => 'حجم الملف كبير جداً',
             'documents.*.mimes' => 'امتداد الملف غير مسموح',
-        ];
-    }
+        ],
+
+        'update_complaint_status' => [
+            'status.required' => 'يجب إدخال حالة الشكوى',
+            'complaint_id.required' => 'يجب تحديد الشكوى',
+            'complaint_id.exists' => 'الشكوى غير موجودة',
+        ],
+
+        'add_notice' => [
+            'description.required' => 'الوصف مطلوب (لإضافة ملاحظة)',
+            'complaint_id.required' => 'يجب تحديد الشكوى',
+            'complaint_id.exists' => 'الشكوى غير موجودة',
+        ],
+        'search_complaint_number' => [
+            'complaint_number.required' => 'رقم الشكوى مطلوب',
+        ],
+
+        default => []
+    };
+}
 
 }

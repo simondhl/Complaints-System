@@ -64,7 +64,7 @@ class ComplaintController extends Controller
 
     public function update_complaint_status(ComplaintFormRequest $request)
     {
-      $result = $this->complaintService->createComplaint($request->validated());
+      $result = $this->complaintService->update_complaint_status($request->validated());
       return response()->json([
           'message' => 'تم تعديل حالة الشكوى بنجاح',
       ]);
@@ -72,12 +72,27 @@ class ComplaintController extends Controller
 
     public function add_notice(ComplaintFormRequest $request)
     {
-      $result = $this->complaintService->createComplaint($request->validated());
+      $result = $this->complaintService->add_notice($request->validated());
       return response()->json([
           'message' => 'تم إضافة ملاحظة خاصة بالشكوى بنجاح',
       ]);
     }
 
 
+    public function get_for_citizen()
+    {
+      $complaints = $this->complaintService->get_for_citizen();
+      return response()->json([
+        'complaints' => $complaints
+      ]);
+    }
+
+    public function search_complaint_number(ComplaintFormRequest $request)
+    {
+      $complaint = $this->complaintService->search_complaint_number($request->validated());
+      return response()->json([
+        'complaint' => $complaint
+      ]);
+    }
 
 }

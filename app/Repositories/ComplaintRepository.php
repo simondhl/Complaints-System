@@ -44,7 +44,7 @@ class ComplaintRepository
     public function get_complaints_governement_sectors($user_id)
     {
         $employee0 = $this->employee->where('user_id', $user_id)->first();
-        return $this->complaint->where('government_sector_id', $employee0->government_sector_id)->get();
+        return $this->complaint->where('government_sector_id', $employee0->government_sector_id)->latest()->get();
     }
 
     public function get_complaint($id)
@@ -65,6 +65,26 @@ class ComplaintRepository
     public function find_document_by_id($id)
     {
         return $this->document->where('id', $id)->first();
+    }
+
+    public function updateComplaint(array $data, $id)
+    {
+        return $this->complaint->where('id', $id)->update($data);
+    }
+
+    public function createNotice(array $data)
+    {
+        return $this->notice->create($data);
+    }
+
+    public function get_for_citizen($user_id)
+    {
+        return $this->complaint->where('user_id', $user_id)->latest()->get();
+    }
+
+    public function search_complaint_number($complaint_number)
+    {
+        return $this->complaint->where('complaint_number', $complaint_number)->first();
     }
 
 }

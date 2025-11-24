@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Complaint;
-use App\Models\Complaint_document;
 use App\Repositories\ComplaintRepository;
+use App\Repositories\OperationRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,11 +14,14 @@ class ComplaintService
 
   protected $complaintRepository;
   protected $userRepository;
+  protected $operationRepository;
 
-  public function __construct(ComplaintRepository $complaintRepository, UserRepository $userRepository)
+  public function __construct(ComplaintRepository $complaintRepository, UserRepository $userRepository,
+    OperationRepository $operationRepository)
   {
       $this->complaintRepository = $complaintRepository;
       $this->userRepository = $userRepository;
+      $this->operationRepository = $operationRepository;
   }
 
   public function get_all_government_sectors()
@@ -138,5 +140,54 @@ class ComplaintService
     );
   }
 
+
+  public function update_complaint_status(array $data)
+  {
+
+    $complaint = $this->complaintRepository->updateComplaint([
+      'status' => $data['status'],
+    ], $data['complaint_id']);
+
+    // $user = Auth::user();
+    // $employee = $this->complaintRepository->get_employee($user->id);
+    // $complaint = $this->operationRepository->createOperation([
+    //   'complaint_id' => $data['complaint_id'],
+    //   'employee_id' => $employee->id,
+    //   'notice_id' => null,
+    //   'details' => 'تم التعديل على حالة الشكوى',
+    //   'operation_date' => now()->addHours(3),
+    // ]);
+
+  }
+
+  public function add_notice(array $data)
+  {
+    $notice = $this->complaintRepository->createNotice([
+      'complaint_id' => $data['complaint_id'],
+      'description' => $data['description'],
+    ]);
+
+    // $user = Auth::user();
+    // $employee = $this->complaintRepository->get_employee($user->id);
+    // $complaint = $this->operationRepository->createOperation([
+    //   'complaint_id' => $data['complaint_id'],
+    //   'employee_id' => $employee->id,
+    //   'notice_id' => $notice->id,
+    //   'details' => 'تمت إضافة ملاحظة خاصة بالشكوى',
+    //   'operation_date' => now()->addHours(3),
+    // ]);
+  }
+
+
+  public function get_for_citizen()
+  {
+    $user = Auth::user();
+    return $this->complaintRepository->get_for_citizen($user->id);
+  }
+
+  public function search_complaint_number(array $data)
+  {
+    return $this->complaintRepository->search_complaint_number($data['complaint_number']);
+  }
 
 }
