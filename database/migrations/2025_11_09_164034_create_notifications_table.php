@@ -19,6 +19,7 @@ return new class extends Migration
             ->cascadeOnUpdate();
             $table->longText('message');
             $table->boolean('status');
+            $table->bigInteger('complaint_number');
             $table->timestamps();
         });
     }

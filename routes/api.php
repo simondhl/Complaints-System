@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/Register', [AuthController::class, 'user_Register']);
@@ -28,6 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/Complaints/delete/{id}', [ComplaintController::class, 'delete_by_citizen']);
     Route::get('/Complaints/Citizen', [ComplaintController::class, 'get_for_citizen']);
     Route::post('/Complaints/Search', [ComplaintController::class, 'search_complaint_number']);
+
+    Route::get('/Notifications', [NotificationController::class, 'get_all_notifications']);
+    Route::get('/NewNotifications/Count', [NotificationController::class, 'new_notifications_count']);
   });
 
   // Employee Routes
