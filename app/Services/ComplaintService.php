@@ -59,6 +59,10 @@ class ComplaintService
                   'video/mp4',
                   'video/quicktime',
                   'application/zip',
+                  'image/heic',
+                  'image/heif',
+                  'image/heic-sequence',
+                  'image/heif-sequence'
               ];
               if (!in_array($realMime, $allowedMime)) {
                   $errors[] = [
@@ -188,6 +192,139 @@ class ComplaintService
   public function search_complaint_number(array $data)
   {
     return $this->complaintRepository->search_complaint_number($data['complaint_number']);
+  }
+
+  public function update_complaint_by_citizen(array $data, array $files = [])
+  {
+      $uploadedDocuments = [];
+      $errors = [];
+
+      $complaint = $this->complaintRepository->get_complaint($data['complaint_id']);
+
+      $user = Auth::user();
+      if ($complaint->user_id !== $user->id) {
+          return [
+              'success' => false,
+              'message' => 'غير مصرح لك بتعديل هذه الشكوى',
+          ];
+      }
+
+      if ($complaint->status !== 'جديدة') {
+          return [
+              'success' => false,
+              'message' => 'لا يمكن تعديل الشكوى إلا إذا كانت حالتها (جديدة)',
+          ];
+      }
+
+      $updateData = [];
+      if (isset($data['location'])) {
+          $updateData['location'] = $data['location'];
+      }
+      if (isset($data['description'])) {
+          $updateData['description'] = $data['description'];
+      }
+      if (isset($data['complaint_type'])) {
+          $updateData['complaint_type'] = $data['complaint_type'];
+      }
+
+      if (!empty($updateData)) {
+          $this->complaintRepository->updateComplaint($updateData, $complaint->id);
+          $complaint = $this->complaintRepository->get_complaint($data['complaint_id']);
+      }
+
+      foreach ($files as $file) {
+          try {
+              $finfo = finfo_open(FILEINFO_MIME_TYPE);
+              $realMime = finfo_file($finfo, $file->getPathname());
+              finfo_close($finfo);
+              $allowedMime = [
+                  'image/jpeg',
+                  'image/png',
+                  'image/gif',
+                  'application/pdf',
+                  'video/mp4',
+                  'video/quicktime',
+                  'application/zip',
+                  'image/heic',
+                  'image/heif',
+                  'image/heic-sequence',
+                  'image/heif-sequence',
+              ];
+              if (!in_array($realMime, $allowedMime)) {
+                  $errors[] = [
+                      'name' => $file->getClientOriginalName(),
+                      'message' => 'نوع الملف الحقيقي غير مسموح: '.$realMime
+                  ];
+                  continue;
+              }
+
+              $extension = strtolower($file->getClientOriginalExtension());
+              $uuid = Str::uuid()->toString();
+              $newName = "{$uuid}.{$extension}";
+              $path = "complaints/{$complaint->id}/{$newName}";
+
+              Storage::disk('local')->put($path, file_get_contents($file));
+
+              $doc = $this->complaintRepository->createDocument([
+                  'complaint_id' => $complaint->id,
+                  'document_path' => $path,
+                  'mime_type' => $realMime,
+              ]);
+              $uploadedDocuments[] = $doc;
+
+          } catch (\Exception $e) {
+              $errors[] = [
+                  'name' => $file->getClientOriginalName(),
+                  'message' => $e->getMessage()
+              ];
+          }
+      }
+
+      return [
+          'success' => true,
+          'message' => 'تم تحديث الشكوى بنجاح',
+          'complaint' => $complaint,
+          'documents' => $uploadedDocuments,
+          'errors' => $errors
+      ];
+  }
+
+
+  public function delete_complaint_by_citizen($id)
+  {
+    $user = Auth::user();
+    $complaint = $this->complaintRepository->get_complaint($id);
+
+    if ($complaint->user_id !== $user->id) {
+        return [
+            'success' => false,
+            'message' => 'غير مصرح لك بحذف هذه الشكوى',
+        ];
+    }
+    if ($complaint->status !== 'جديدة') {
+        return [
+            'success' => false,
+            'message' => 'لا يمكن حذف الشكوى إلا إذا كانت حالتها (جديدة)',
+        ];
+    }
+
+    try {
+        $folderPath = "complaints/{$complaint->id}";
+        if (Storage::disk('local')->exists($folderPath)) {
+            Storage::disk('local')->deleteDirectory($folderPath);
+        }
+    } catch (\Exception $e) {
+        return [
+            'success' => false,
+            'message' => 'حدث خطأ أثناء حذف الملفات: ' . $e->getMessage(),
+        ];
+    }
+
+    $delete_complaint = $this->complaintRepository->delete_complaint($id);
+    return [
+        'success' => true,
+        'message' => 'تم حذف الشكوى بنجاح',
+    ];
   }
 
 }

@@ -95,4 +95,35 @@ class ComplaintController extends Controller
       ]);
     }
 
+    public function update_by_citizen(ComplaintFormRequest $request)
+    {
+        $files = $request->hasFile('documents') ? $request->file('documents') : [];
+        $result = $this->complaintService->update_complaint_by_citizen(
+            $request->validated(),
+            $files
+        );
+      
+        if (!$result['success']) {
+            return response()->json([
+                'message' => $result['message'],
+            ], 400);
+        }
+      
+        return response()->json([
+            'message' => $result['message'],
+            'complaint' => $result['complaint'],
+            'documents' => $result['documents'],
+            'errors' => $result['errors']
+        ], 200);
+    }
+
+    public function delete_by_citizen($id)
+    {
+      $result = $this->complaintService->delete_complaint_by_citizen($id);
+      
+      return response()->json([
+          'message' => $result['message'],
+      ]);
+    }
+
 }

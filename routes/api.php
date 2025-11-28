@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::middleware('role:citizen')->group(function () {
 
     Route::post('/Complaints', [ComplaintController::class, 'store']);
+    Route::post('/Complaints/update', [ComplaintController::class, 'update_by_citizen']);
+    Route::delete('/Complaints/delete/{id}', [ComplaintController::class, 'delete_by_citizen']);
     Route::get('/Complaints/Citizen', [ComplaintController::class, 'get_for_citizen']);
     Route::post('/Complaints/Search', [ComplaintController::class, 'search_complaint_number']);
   });

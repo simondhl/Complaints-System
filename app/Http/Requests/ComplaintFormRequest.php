@@ -24,7 +24,7 @@ class ComplaintFormRequest extends FormRequest
             'description' => ['required', 'string', new NoHtml],
             'complaint_type' => ['required', 'string', new NoHtml],
             'documents' => 'nullable|array',
-            'documents.*' => 'file|max:51200|mimes:jpg,jpeg,png,gif,pdf,mp4,mov,zip',
+            'documents.*' => 'file|max:51200|mimes:jpg,jpeg,png,pdf,mp4,mov,zip,heic,heif',
         ],
         'update_complaint_status' => [
             'status' => ['required', 'string', new NoHtml],
@@ -36,6 +36,14 @@ class ComplaintFormRequest extends FormRequest
         ],
         'search_complaint_number' => [
             'complaint_number' => ['required', 'string', new NoHtml],
+        ],
+        'update_by_citizen' => [
+            'complaint_id' => 'required|exists:complaints,id',
+            'location' => ['nullable', 'string', 'max:255', new NoHtml],
+            'description' => ['nullable', 'string', new NoHtml],
+            'complaint_type' => ['nullable', 'string', new NoHtml],
+            'documents' => 'nullable|array',
+            'documents.*' => 'file|max:51200|mimes:jpg,jpeg,png,pdf,mp4,mov,zip,heic,heif',
         ],
 
         default => [],
@@ -71,6 +79,14 @@ class ComplaintFormRequest extends FormRequest
         ],
         'search_complaint_number' => [
             'complaint_number.required' => 'رقم الشكوى مطلوب',
+        ],
+        'update_by_citizen' => [
+            'complaint_id.required' => 'يجب تحديد الشكوى',
+            'complaint_id.exists' => 'الشكوى غير موجودة',
+            'documents.array' => 'يجب أن تكون الملفات مصفوفة',
+            'documents.*.file' => 'كل ملف يجب أن يكون ملفاً صحيحاً',
+            'documents.*.max' => 'حجم الملف كبير جداً',
+            'documents.*.mimes' => 'امتداد الملف غير مسموح',
         ],
 
         default => []

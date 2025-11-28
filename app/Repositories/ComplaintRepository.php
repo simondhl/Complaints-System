@@ -87,4 +87,9 @@ class ComplaintRepository
         return $this->complaint->where('complaint_number', $complaint_number)->first();
     }
 
+    public function delete_complaint($id)
+    {
+        return $this->complaint->where('id', $id)->delete();
+    }
+
 }
