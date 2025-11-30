@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/Notifications', [NotificationController::class, 'get_all_notifications']);
     Route::get('/NewNotifications/Count', [NotificationController::class, 'new_notifications_count']);
+    Route::post('/SaveDeviceToken', [NotificationController::class, 'save_device_token']);
   });
 
   // Employee Routes

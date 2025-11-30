@@ -2,17 +2,21 @@
 
 namespace App\Services;
 
+use App\Jobs\SendFcmNotification;
 use App\Repositories\NotificationRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationService
 {
 
     protected $notificationRepository;
+    protected $userRepository;
 
-    public function __construct(NotificationRepository $notificationRepository)
+    public function __construct(NotificationRepository $notificationRepository, UserRepository $userRepository)
     {
         $this->notificationRepository = $notificationRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function send_notification(int $user_ID, string $message, int $complaint_number)
@@ -24,6 +28,15 @@ class NotificationService
           'complaint_number' => $complaint_number
         ]);  
 
+        $user = $this->userRepository->findByID($user_ID);
+        $device_tokens = $user->device_token;
+
+        foreach ($device_tokens as $device) {
+            
+            SendFcmNotification::dispatch($device->token, $message);
+            // dispatch(new SendFcmNotification($device->token, $message));
+        }
+
     }
 
     public function get_all_notifications()
@@ -34,7 +47,7 @@ class NotificationService
 
         $this->notificationRepository->update(['status' => true], $user->id);
         
-        return ['notificatios' => $notificatios]; 
+        return ['notifications' => $notificatios]; 
     }
 
     public function new_notifications_count()
@@ -42,6 +55,13 @@ class NotificationService
         $user = Auth::user();
         $notificatios = $this->notificationRepository->count($user->id);
         return $notificatios;
+    }
+
+    public function save_device_token(string $token)
+    {
+      $user = Auth::user();
+      return $this->notificationRepository->update_or_create_token($token, $user->id);
+
     }
 
 

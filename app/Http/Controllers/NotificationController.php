@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Device_token;
 use App\Services\NotificationService;
+use Illuminate\Container\Attributes\Auth;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -20,5 +23,15 @@ class NotificationController extends Controller
     public function new_notifications_count()
     {
         return response()->json(['count' => $this->notificationService->new_notifications_count()]);
+    }
+
+    public function save_device_token(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string'
+        ]);
+        $this->notificationService->save_device_token($request->token);
+        
+        return response()->json(['message' => 'تم حفظ التوكين للجهاز']);
     }
 }

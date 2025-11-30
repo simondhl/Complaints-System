@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Device_token;
 use App\Models\Notification;
 
 class NotificationRepository
@@ -33,4 +34,11 @@ class NotificationRepository
         return $this->notification->where('user_id', $user_id)->where('status', false)->count();
     }
 
+    public function update_or_create_token(string $token, int $userId)
+    {
+        return Device_token::updateOrCreate(
+            ['token' => $token],
+            ['user_id' => $userId,]
+        );
+    }
 }

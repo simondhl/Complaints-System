@@ -47,4 +47,8 @@ class User extends Authenticatable
     public function employee(){
         return $this->hasOne(Employee::class);
     }
+    public function device_token()
+    {
+        return $this->hasMany(Device_token::class);
+    }
 }
