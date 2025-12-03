@@ -33,7 +33,7 @@ class NotificationService
 
         foreach ($device_tokens as $device) {
             
-            SendFcmNotification::dispatch($device->token, $message);
+            SendFcmNotification::dispatch($device->token, $notification);
             // dispatch(new SendFcmNotification($device->token, $message));
         }
 

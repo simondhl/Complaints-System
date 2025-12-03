@@ -22,7 +22,7 @@ class SendFcmNotification implements ShouldQueue
     {
         $this->token = $token;
         $this->message = $message;
-        Log::info("{$token}");
+        Log::info("Dispatching job for token: {$token}");
     }
 
     public function handle()
@@ -46,8 +46,21 @@ class SendFcmNotification implements ShouldQueue
                 "token" => $this->token,
                 "notification" => [
                     "title" => "تنبيه جديد",
-                    "body" => $this->message
+                    "body" => $this->message['message']
                 ],
+                "data" => [
+                     "notification" => json_encode($this->message, JSON_UNESCAPED_UNICODE),
+                 ],
+             
+                 "android" => [
+                     "priority" => "high"
+                 ],
+             
+                 "apns" => [
+                     "headers" => [
+                         "apns-priority" => "10"
+                     ]
+                 ]
             ]
         ];
 
