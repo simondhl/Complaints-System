@@ -155,7 +155,7 @@ class ComplaintService
     $complaint = $this->complaintRepository->get_complaint($data['complaint_id']);
     // $message = "The flight {$outboundFlight->flight_number} has been successfully reserved in {$outboundFlight->date}. Enjoy your flight!";
     $message = "تم تغيير حالة الشكوى رقم {$complaint->complaint_number} إلى {$complaint->status}";
-    app(\App\Services\NotificationService::class)->send_notification($complaint->user_id, $message, $complaint->complaint_number);
+    app(\App\Services\NotificationService::class)->send_notification($complaint->user_id, $message, $complaint->id);
 
     // $user = Auth::user();
     // $employee = $this->complaintRepository->get_employee($user->id);
@@ -179,7 +179,7 @@ class ComplaintService
     $complaint = $this->complaintRepository->get_complaint($data['complaint_id']);
 
     $message = "تم إضافة ملاحظة جديدة للشكوى رقم {$complaint->complaint_number}. {$notice->description}";
-    app(\App\Services\NotificationService::class)->send_notification($complaint->user_id, $message, $complaint->complaint_number);
+    app(\App\Services\NotificationService::class)->send_notification($complaint->user_id, $message, $complaint->id);
 
     // $user = Auth::user();
     // $employee = $this->complaintRepository->get_employee($user->id);
