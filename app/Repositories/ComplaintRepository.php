@@ -92,4 +92,9 @@ class ComplaintRepository
         return $this->complaint->where('id', $id)->delete();
     }
 
+    public function get_employee($user_id)
+    {
+        return $this->employee->where('user_id', $user_id)->first();
+    }
+
 }

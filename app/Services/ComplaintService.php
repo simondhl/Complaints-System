@@ -6,6 +6,7 @@ use App\Repositories\ComplaintRepository;
 use App\Repositories\OperationRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -26,7 +27,10 @@ class ComplaintService
 
   public function get_all_government_sectors()
   {
-    return $this->complaintRepository->get_governement_sectors();
+    return Cache::remember('government_sectors', 3600, function () {
+        return $this->complaintRepository->get_governement_sectors();
+    });
+    // return $this->complaintRepository->get_governement_sectors();
   }
 
 
@@ -45,6 +49,8 @@ class ComplaintService
           'complaint_type' => $data['complaint_type'],
           'complaint_number' => $complaint_number,
       ]);
+      $this->clearComplaintCache($complaint);
+
       foreach ($files as $file) {
           try {
               // MIME real
@@ -104,7 +110,13 @@ class ComplaintService
   public function get_for_government_sector()
   {
     $user = Auth::user();
-    return $this->complaintRepository->get_complaints_governement_sectors($user->id);
+    $employee = $this->complaintRepository->get_employee($user->id);
+    $cacheKey = "sector_complaints_{$employee->government_sector_id}";
+
+    return Cache::remember($cacheKey, 300, function () use ($user) {
+        return $this->complaintRepository->get_complaints_governement_sectors($user->id);
+    });
+    // return $this->complaintRepository->get_complaints_governement_sectors($user->id);
   }
 
 
@@ -157,15 +169,17 @@ class ComplaintService
     $message = "تم تغيير حالة الشكوى رقم {$complaint->complaint_number} إلى {$complaint->status}";
     app(\App\Services\NotificationService::class)->send_notification($complaint->user_id, $message, $complaint->id);
 
-    // $user = Auth::user();
-    // $employee = $this->complaintRepository->get_employee($user->id);
-    // $complaint = $this->operationRepository->createOperation([
-    //   'complaint_id' => $data['complaint_id'],
-    //   'employee_id' => $employee->id,
-    //   'notice_id' => null,
-    //   'details' => 'تم التعديل على حالة الشكوى',
-    //   'operation_date' => now()->addHours(3),
-    // ]);
+    $user = Auth::user();
+    $employee = $this->complaintRepository->get_employee($user->id);
+    $operation = "قام الموظف صاحب الرقم {$employee->employee_number} بتغيير حالة الشكوى رقم {$complaint->complaint_number} إلى {$complaint->status}";
+    $operation = $this->operationRepository->createOperation([
+      'complaint_id' => $data['complaint_id'],
+      'employee_id' => $employee->id,
+      'notice_id' => null,
+      'details' => $operation,
+      'operation_date' => now()->addHours(3),
+    ]);
+    $this->clearComplaintCache($complaint);
 
   }
 
@@ -181,22 +195,27 @@ class ComplaintService
     $message = "تم إضافة ملاحظة جديدة للشكوى رقم {$complaint->complaint_number}. {$notice->description}";
     app(\App\Services\NotificationService::class)->send_notification($complaint->user_id, $message, $complaint->id);
 
-    // $user = Auth::user();
-    // $employee = $this->complaintRepository->get_employee($user->id);
-    // $complaint = $this->operationRepository->createOperation([
-    //   'complaint_id' => $data['complaint_id'],
-    //   'employee_id' => $employee->id,
-    //   'notice_id' => $notice->id,
-    //   'details' => 'تمت إضافة ملاحظة خاصة بالشكوى',
-    //   'operation_date' => now()->addHours(3),
-    // ]);
+    $user = Auth::user();
+    $employee = $this->complaintRepository->get_employee($user->id);
+    $operation = "قام الموظف صاحب الرقم {$employee->employee_number} بإضافة ملاحظة للشكوى رقم {$complaint->complaint_number}";
+    $operation = $this->operationRepository->createOperation([
+      'complaint_id' => $data['complaint_id'],
+      'employee_id' => $employee->id,
+      'notice_id' => $notice->id,
+      'details' => $operation,
+      'operation_date' => now()->addHours(3),
+    ]);
   }
 
 
   public function get_for_citizen()
   {
     $user = Auth::user();
-    return $this->complaintRepository->get_for_citizen($user->id);
+    $cacheKey = "citizen_complaints_{$user->id}";
+    return Cache::remember($cacheKey, 300, function () use ($user) {
+        return $this->complaintRepository->get_for_citizen($user->id);
+    });
+    // return $this->complaintRepository->get_for_citizen($user->id);
   }
 
   public function search_complaint_number(array $data)
@@ -240,6 +259,7 @@ class ComplaintService
       if (!empty($updateData)) {
           $this->complaintRepository->updateComplaint($updateData, $complaint->id);
           $complaint = $this->complaintRepository->get_complaint($data['complaint_id']);
+          $this->clearComplaintCache($complaint);
       }
 
       foreach ($files as $file) {
@@ -331,10 +351,17 @@ class ComplaintService
     }
 
     $delete_complaint = $this->complaintRepository->delete_complaint($id);
+    $this->clearComplaintCache($complaint);
     return [
         'success' => true,
         'message' => 'تم حذف الشكوى بنجاح',
     ];
   }
 
+  private function clearComplaintCache($complaint)
+  {
+    Cache::forget("citizen_complaints_{$complaint->user_id}");
+
+    Cache::forget("sector_complaints_{$complaint->government_sector_id}");
+  }
 }

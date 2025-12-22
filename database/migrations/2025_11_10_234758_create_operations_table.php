@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('operations', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('notice_id');
+            $table->bigInteger('notice_id')->nullable();
             $table->foreignId('employee_id')
             ->constrained('employees')
             ->cascadeOnDelete()
