@@ -358,10 +358,34 @@ class ComplaintService
     ];
   }
 
+  public function get_by_government_sector($government_sector_id)
+  {
+
+    $cacheKey = "sector_complaints_{$government_sector_id}";
+
+    return Cache::remember($cacheKey, 300, function () use ($government_sector_id) {
+        return $this->complaintRepository->get_complaints_by_governement_sectors($government_sector_id);
+    });
+  }
+
   private function clearComplaintCache($complaint)
   {
     Cache::forget("citizen_complaints_{$complaint->user_id}");
 
     Cache::forget("sector_complaints_{$complaint->government_sector_id}");
+  }
+
+  public function get_records_by_date(array $request)
+  {
+    $complaints = $this->complaintRepository->get_complaints_by_date($request['start_date'], $request['end_date']);
+    $operations = $this->operationRepository->get_operations_by_date($request['start_date'], $request['end_date']);
+
+    return [
+        'complaints' => $complaints,
+        'complaints_count' => $complaints->count(),
+        'operations' => $operations,
+        'operations_count' => $operations->count(),
+    ];
+
   }
 }

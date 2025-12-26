@@ -97,4 +97,15 @@ class ComplaintRepository
         return $this->employee->where('user_id', $user_id)->first();
     }
 
+    public function get_complaints_by_governement_sectors($government_sector_id)
+    {
+        return $this->complaint->where('government_sector_id', $government_sector_id)->latest()->get();
+    }
+
+    public function get_complaints_by_date($start_date, $end_date)
+    {
+        return $this->complaint->whereDate('created_at', '>=', $start_date)
+        ->whereDate('created_at', '<=', $end_date)
+        ->get();
+    }
 }

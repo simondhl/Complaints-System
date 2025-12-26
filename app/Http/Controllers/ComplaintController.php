@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ComplaintFormRequest;
 use App\Services\ComplaintService;
 use Illuminate\Http\JsonResponse;
+use TCPDF;
 
 class ComplaintController extends Controller
 {
@@ -124,6 +125,55 @@ class ComplaintController extends Controller
       return response()->json([
           'message' => $result['message'],
       ]);
+    }
+
+    public function get_by_government_sector($government_sector_id)
+    {
+      $complaints = $this->complaintService->get_by_government_sector($government_sector_id);
+      return response()->json([
+        'complaints' => $complaints
+      ]);
+    }
+
+    public function get_records_by_date(ComplaintFormRequest $request)
+    {
+        $result = $this->complaintService->get_records_by_date($request->validated());
+      
+        return response()->json([
+          'complaints' => $result['complaints'],
+          'complaints_count' => $result['complaints_count'],
+          'operations' => $result['operations'],
+          'operations_count' => $result['operations_count'],
+        ], 200);
+    }
+
+    public function get_report_by_date(ComplaintFormRequest $request)
+    {
+        $data = $this->complaintService->get_records_by_date($request->validated());
+
+        $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+        $pdf->SetTitle('تقرير الشكاوى والعمليات');
+        $pdf->SetMargins(10, 15, 10);
+        $pdf->SetAutoPageBreak(true, 15);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(true);
+
+        $pdf->SetFont('dejavusans', '', 12);
+
+        $pdf->AddPage();
+
+        $html = view('reports.report', [
+            'complaints' => $data['complaints'],
+            'complaints_count' => $data['complaints_count'],
+            'operations' => $data['operations'],
+            'operations_count' => $data['operations_count'],
+            'start_date' => $request['start_date'],
+            'end_date' => $request['end_date'],
+        ])->render();
+
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        return $pdf->Output('report.pdf', 'D'); 
     }
 
 }

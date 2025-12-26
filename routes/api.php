@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/Register', [AuthController::class, 'user_Register']);
@@ -45,7 +46,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
   // Admin Routes
   Route::middleware('role:admin')->group(function () {
+      Route::get('/Complaints/GovernmentSector/{id}', [ComplaintController::class, 'get_by_government_sector']);
+      Route::post('/CreateEmployee', [UserController::class, 'create_employee']);
+      Route::get('/Users', [UserController::class, 'get_all_users']);
+      Route::get('/Employees', [UserController::class, 'get_all_employees']);
 
+      Route::post('/GetRecordsByDate', [ComplaintController::class, 'get_records_by_date']);
+      Route::post('/ExportReportByDate', [ComplaintController::class, 'get_report_by_date']);
   });
   
 });

@@ -45,6 +45,14 @@ class ComplaintFormRequest extends FormRequest
             'documents' => 'nullable|array',
             'documents.*' => 'file|max:51200|mimes:jpg,jpeg,png,pdf,mp4,mov,zip,heic,heif',
         ],
+        'get_records_by_date' => [
+            'start_date' => 'required|date|before_or_equal:today',
+            'end_date'   => 'required|date|before_or_equal:today|after_or_equal:start_date',
+        ],
+        'get_report_by_date' => [
+            'start_date' => 'required|date|before_or_equal:today',
+            'end_date'   => 'required|date|before_or_equal:today|after_or_equal:start_date',
+        ],
 
         default => [],
       };
