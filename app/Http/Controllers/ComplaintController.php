@@ -66,6 +66,12 @@ class ComplaintController extends Controller
     public function update_complaint_status(ComplaintFormRequest $request)
     {
       $result = $this->complaintService->update_complaint_status($request->validated());
+      if (!$result) {
+          return response()->json([
+              'message' => 'تم تعديل الشكوى من قبل موظف آخر',
+          ], 409);
+      }
+
       return response()->json([
           'message' => 'تم تعديل حالة الشكوى بنجاح',
       ]);

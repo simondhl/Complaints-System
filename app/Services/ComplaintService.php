@@ -159,13 +159,18 @@ class ComplaintService
 
   public function update_complaint_status(array $data)
   {
+    $complaint = $this->complaintRepository->get_complaint($data['complaint_id']);
+    if ($complaint->version != $data['version']) {
+      return false;
+    }
 
     $update = $this->complaintRepository->updateComplaint([
       'status' => $data['status'],
+      'version' => $data['version'] + 1,
     ], $data['complaint_id']);
 
     $complaint = $this->complaintRepository->get_complaint($data['complaint_id']);
-    // $message = "The flight {$outboundFlight->flight_number} has been successfully reserved in {$outboundFlight->date}. Enjoy your flight!";
+
     $message = "تم تغيير حالة الشكوى رقم {$complaint->complaint_number} إلى {$complaint->status}";
     app(\App\Services\NotificationService::class)->send_notification($complaint->user_id, $message, $complaint->id);
 
@@ -180,6 +185,7 @@ class ComplaintService
       'operation_date' => now()->addHours(3),
     ]);
     $this->clearComplaintCache($complaint);
+    return true;
 
   }
 

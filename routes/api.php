@@ -11,7 +11,7 @@ Route::get('/SendEmail/{email}', [AuthController::class, 'send_email']);
 Route::post('/Verification/{email}', [AuthController::class, 'verification']);
 Route::post('/ReSetPassword', [AuthController::class, 'reset_password']);
 
-Route::post('/Login', [AuthController::class, 'login']);
+Route::post('/Login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
 

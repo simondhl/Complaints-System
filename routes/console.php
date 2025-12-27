@@ -1,8 +1,13 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Log;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+Schedule::command('backup:run')
+    ->dailyAt('14:53')->timezone('Asia/Damascus')
+    ->onSuccess(function () {
+        Log::info('Scheduled backup completed successfully');
+    })
+    ->onFailure(function () {
+        Log::error('Scheduled backup failed');
+    });

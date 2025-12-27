@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Complaint extends Model
 {
     protected $fillable=['user_id','government_sector_id','location','description',
-     'complaint_type', 'complaint_number'];
+     'complaint_type', 'complaint_number', 'version'];
 
     public function user(){
         return $this->belongsTo(User::class);

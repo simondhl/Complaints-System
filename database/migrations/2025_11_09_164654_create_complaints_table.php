@@ -26,6 +26,7 @@ return new class extends Migration
             $table->longText('complaint_type');
             $table->bigInteger('complaint_number');
             $table->string('status')->default('جديدة');
+            $table->unsignedInteger('version')->default(1);
             $table->timestamps();
         });
     }

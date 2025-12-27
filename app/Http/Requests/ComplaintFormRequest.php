@@ -29,6 +29,7 @@ class ComplaintFormRequest extends FormRequest
         'update_complaint_status' => [
             'status' => ['required', 'string', new NoHtml],
             'complaint_id' => 'required|exists:complaints,id',
+            'version' => 'required|integer',
         ],
         'add_notice' => [
             'description' => ['required', 'string', new NoHtml],
@@ -78,6 +79,7 @@ class ComplaintFormRequest extends FormRequest
             'status.required' => 'يجب إدخال حالة الشكوى',
             'complaint_id.required' => 'يجب تحديد الشكوى',
             'complaint_id.exists' => 'الشكوى غير موجودة',
+            'version.required' => 'يجب إدخال حالة الشكوى',
         ],
 
         'add_notice' => [
