@@ -179,7 +179,11 @@ class ComplaintController extends Controller
 
         $pdf->writeHTML($html, true, false, true, false, '');
 
-        return $pdf->Output('report.pdf', 'D'); 
+        $content = $pdf->Output('report.pdf', 'S');
+        
+        return response($content, 200)
+          ->header('Content-Type', 'application/pdf')
+          ->header('Content-Disposition', 'attachment; filename="report.pdf"');
     }
 
 }
